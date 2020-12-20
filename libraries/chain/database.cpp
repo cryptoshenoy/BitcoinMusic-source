@@ -64,8 +64,8 @@ const uint8_t streaming_platform_object::type_id;
 
 muse::chain::asset_id_type MUSE_SYMBOL=(muse::chain::asset_id_type(0));
 muse::chain::asset_id_type VESTS_SYMBOL=(muse::chain::asset_id_type(1));
-muse::chain::asset_id_type MBD_SYMBOL=(muse::chain::asset_id_type(2));
-    
+muse::chain::asset_id_type MBD_SYMBOL=(muse::chain::asset_id_type(13)); //changing MBD id from 2 to 13
+muse::chain::asset_id_type BTCM_SYMBOL=(muse::chain::asset_id_type(11));   //declaring BTCM as asset id 11
 
 inline u256 to256( const fc::uint128& t ) {
    u256 v(t.hi);
@@ -2156,7 +2156,7 @@ asset database::get_producer_reward()
 
 /**
  *  Iterates over all conversion requests with a conversion date before
- *  the head block time and then converts them to/from muse/mbd at the
+ *  the head block time and then converts them to/from BTCM/mbd at the
  *  current median price feed history price times the premium
  */
 void database::process_conversions()
@@ -2176,11 +2176,13 @@ void database::process_conversions()
    {
       const auto& user = get_account( itr->owner );
       auto amount_to_issue = itr->amount * fhistory.effective_median_history;
+	  amount_to_issue.amount.asset_id = BTCM_SYMBOL; //the asset issued is modified to BTCM instead of MUSE
+	  
 
       adjust_balance( user, amount_to_issue );
 
       net_mbd   += itr->amount;
-      net_muse += amount_to_issue;
+      net_muse += amount_to_issue; //the total supply still needs to be added as BTCM is considered as an additional base asset
 
       push_applied_operation( fill_convert_request_operation ( user.name, itr->requestid, itr->amount, amount_to_issue ) );
 

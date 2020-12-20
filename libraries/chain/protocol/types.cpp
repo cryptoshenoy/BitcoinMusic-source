@@ -181,7 +181,8 @@ using namespace muse::chain;
 
 asset_id_type MUSE_SYMBOL(0);
 asset_id_type VESTS_SYMBOL(1);
-asset_id_type MBD_SYMBOL(2);
+asset_id_type MBD_SYMBOL(13); //changing asset id to 13, representing xUSD
+asset_id_type BTCM_SYMBOL(11); //declaring BTCM as id 11
 
 namespace fc
 {
