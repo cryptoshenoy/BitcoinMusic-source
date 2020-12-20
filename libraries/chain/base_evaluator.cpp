@@ -571,13 +571,13 @@ void convert_evaluator::do_apply( const convert_operation& o )
 	  if( o.amount.asset_id == MUSE_SYMBOL )
 	  {
 		 const asset amount_to_issue = o.amount * fhistory.effective_median_history; 
-		 const asset amount_to_substract = o;
+		 const asset amount_to_subtract = o;
 		 amount_to_issue.amount.asset_id = MBD_SYMBOL; //making sure it's the new MBD asset id for safety
-		 amount_to_subract.amount.asset_id = BTCM_SYMBOL; //converts 1 USD worth of BTCM to MBD
-		 db().adjust_balance( owner, -amount_to_subract.amount );}
+		 amount_to_subtract.amount.asset_id = BTCM_SYMBOL; //converts 1 USD worth of BTCM to MBD
+		 db().adjust_balance( owner, -amount_to_subtract.amount );}
 		 db().adjust_balance( owner, amount_to_issue );
 
-		 db().push_applied_operation( fill_convert_request_operation ( o.owner, o.requestid, amount_to_substract.amount, amount_to_issue ) );
+		 db().push_applied_operation( fill_convert_request_operation ( o.owner, o.requestid, amount_to_subtract.amount, amount_to_issue ) );
 
 		 db().modify( db().get_dynamic_global_properties(),
 					  [&o,&amount_to_issue,&fhistory]( dynamic_global_property_object& p )
@@ -591,12 +591,12 @@ void convert_evaluator::do_apply( const convert_operation& o )
 	  else if( o.amount.asset_id == BTCM_SYMBOL )   //this operation will convert MUSE into BTCM
 	  {
 		 const asset amount_to_issue = o;
-		 const asset amount_to_substract = o;
+		 const asset amount_to_subtract = o;
 		 amount_to_subract.amount.asset_id = MUSE_SYMBOL;
-		 db().adjust_balance( owner, -amount_to_substract.amount );
+		 db().adjust_balance( owner, -amount_to_subtract.amount );
 		 db().adjust_balance( owner, amount_to_issue.amount );
 
-		 db().push_applied_operation( fill_convert_request_operation ( o.owner, o.requestid, amount_to_substract.amount, amount_to_issue ) );
+		 db().push_applied_operation( fill_convert_request_operation ( o.owner, o.requestid, amount_to_subtract.amount, amount_to_issue ) );
 	  }
 	  else
 		 db().create<convert_request_object>( [&]( convert_request_object& obj )
