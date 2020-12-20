@@ -1,0 +1,41 @@
+language: c++
+
+cache: ccache
+
+git:
+  depth: 1
+
+dist: xenial
+
+sudo: true
+
+install:
+ - sudo apt-get install --allow-unauthenticated libboost-thread-dev libboost-iostreams-dev libboost-date-time-dev libboost-system-dev libboost-filesystem-dev libboost-program-options-dev libboost-chrono-dev libboost-test-dev libboost-context-dev libboost-regex-dev libboost-coroutine-dev cmake parallel
+
+addons:
+  sonarcloud:
+    organization: "soundac"
+    token:
+      secure: "nJiutcTRv8dirtQ77NhychWBD7KSmmpSdwi/J5pfT+CBQBNPiYYYxR1wgl1p73FAXcjMORFBt9sOc5enuWvudmRezBGZ2ABMcYaGJZI6EDSKiAsOl3IQlpAMk8E8WLxC9mauu+Ojb480XImGq9WU4ti39/9VH0EpR4ljTYdh45Dq8R/U7LgsJeYyJCWxxQm0usozqaaMb47NgA3RRJWV1MVy8y6b4LYT2OdfsqXGm0t47VPyech3VUrylLGHqN69/5QwiNAmxYxDy0NS0mT3LZ8gBi0rmghFtxe2MQkxHTxiH4g0fG9XVzzWNw82nMKdZRveV+WCyi9odVsdAAjgrJPU0EzEGF3xoG3DFkOyp/tSSxGaVaptklsJ1iUU9Sl8nd2MYg6Nzz3/Ak+Q3KlJtmJ5SjzokXtGDThlk12Ac09YE2949BvrDG2QhIUMc8g9tKbXYM/evUCrGH+KlXyAPKDcHEo2X+F0933Wpn1BFepULctbJh7Q2+HANwsrARBKCpsG/FQ7cftH1YDOJhkDp10iDNH+sQ0lvsl7p0vjbWdtsrooel0IGu50Fh8AiHKRc1XYkgM1AVfB1z3JC2NHaHepbFVhWm4fYppt5GnreK5i3sn/MXir/Kwa1Xsu7CmWx3XJDNfpx+YB35uIyqOYILt5gyNWVW+ODb1QRFMcYCw="
+
+env:
+  global:
+    - CCACHE_COMPRESS=exists_means_true
+    - CCACHE_MAXSIZE=1Gi
+    - CCACHE_SLOPPINESS=include_file_ctime,include_file_mtime,time_macros
+
+script:
+ - programs/build_helpers/buildstep -s 2900
+ - ccache -s
+ - programs/build_helpers/buildstep Prepare 1 "sed -i '/tests/d' libraries/fc/CMakeLists.txt"
+ - programs/build_helpers/buildstep cmake 5 "cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS=--coverage -DCMAKE_CXX_FLAGS=--coverage -DBoost_USE_STATIC_LIBS=OFF -DCMAKE_CXX_OUTPUT_EXTENSION_REPLACE=ON ."
+ - programs/build_helpers/buildstep make.programs 1600 "programs/build_helpers/make_with_sonar bw-output -j 2 cli_wallet mused js_operation_serializer get_dev_key map_muse_network"
+ - programs/build_helpers/buildstep make.chain_test 300 "make -j 2 chain_test"
+ - programs/build_helpers/buildstep make.plugin_test 120 "make -j 2 plugin_test"
+ - set -o pipefail
+ - programs/build_helpers/buildstep run.chain_test 400 "libraries/fc/tests/run-parallel-tests.sh tests/chain_test 2>&1"
+ - programs/build_helpers/buildstep run.plugin_test 30 "libraries/fc/tests/run-parallel-tests.sh tests/plugin_test 2>&1"
+ - 'programs/build_helpers/buildstep prepare.sonar 10 "find libraries/[acdemnpuw]*/CMakeFiles/*.dir programs/[cjmsu]*/CMakeFiles/*.dir -type d | while read d; do gcov -o \"\$d\" \"\${d/CMakeFiles*.dir/./}\"/*.cpp; done >/dev/null; programs/build_helpers/set_sonar_branch sonar-project.properties" || true'
+ - 'programs/build_helpers/buildstep run.sonar 1200 "which sonar-scanner && sonar-scanner" || true'
+ - programs/build_helpers/buildstep end 0
+ - ccache -s
