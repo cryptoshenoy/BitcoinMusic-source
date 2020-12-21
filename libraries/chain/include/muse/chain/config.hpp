@@ -55,8 +55,8 @@
 #define MUSE_ADDRESS_PREFIX                  "MUSE"
 #define MUSE_SYMBOL_STRING   (BASE_SYMBOL)
 #define VESTS_SYMBOL_STRING   "VESTS"
-#define MBD_SYMBOL_STRING     "MBD"
-
+#define MBD_SYMBOL_STRING     "XUSD" //Changing the stablecoin asset from MBD to XUSD
+#define BTCM_SYMBOL_STRING     "BTCM" //New base asset of Bitcoin Music
 #define NULL_SYMBOL  (uint64_t(3) )
 
 #define MUSE_GENESIS_TIME                    (fc::time_point_sec(1458835200))
@@ -92,7 +92,7 @@
 #define MUSE_MAX_TIME_UNTIL_EXPIRATION       (60*60) // seconds,  aka: 1 hour
 #define MUSE_MAX_MEMO_SIZE                   2048
 #define MUSE_MAX_PROXY_RECURSION_DEPTH       4
-#define MUSE_VESTING_WITHDRAW_INTERVALS      13
+#define MUSE_VESTING_WITHDRAW_INTERVALS      4 //changing vesting period from 13 weeks to 4 weeks 
 #define MUSE_VESTING_WITHDRAW_INTERVAL_SECONDS (60*60*24*7) /// 1 week per interval
 #define MUSE_MAX_WITHDRAW_ROUTES             10
 #define MUSE_VOTE_REGENERATION_SECONDS       (5*60*60*24) // 5 day

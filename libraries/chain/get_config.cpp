@@ -111,7 +111,7 @@ fc::variant_object get_config()
    result["MUSE_VOTE_REGENERATION_SECONDS"] = MUSE_VOTE_REGENERATION_SECONDS;
    result["MUSE_SYMBOL"] = MUSE_SYMBOL;
    result["VESTS_SYMBOL"] = VESTS_SYMBOL;
-
+   result["BTCM_SYMBOL"] = BTCM_SYMBOL;
    return result;
 }
 
