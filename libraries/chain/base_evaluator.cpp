@@ -559,10 +559,10 @@ void convert_evaluator::do_apply( const convert_operation& o )
 	  if( o.amount.asset_id == MUSE_SYMBOL || BTCM_SYMBOL )
 		 FC_ASSERT( db().has_hardfork( MUSE_HARDFORK_0_6 ), "XSD -> xUSD & XSD -> BTCM conversion only allowed after hardfork 6!" );
 
-	  if( o.amount.asset_id == MBD_SYMBOL ) {
 	  const auto& owner = db().get_account( o.owner );
+	  
+	  if( o.amount.asset_id == MBD_SYMBOL ) {
 	  FC_ASSERT( db().get_balance( owner, o.amount.asset_id ) >= o.amount );
-
 	  db().adjust_balance( owner, -o.amount );}
 		
 	  const auto& fhistory = db().get_feed_history();
@@ -574,6 +574,7 @@ void convert_evaluator::do_apply( const convert_operation& o )
 		 const asset amount_to_subtract = o;
 		 amount_to_issue.amount.asset_id = MBD_SYMBOL; //making sure it's the new MBD asset id for safety
 		 amount_to_subtract.amount.asset_id = BTCM_SYMBOL; //converts 1 USD worth of BTCM to MBD
+		 FC_ASSERT( db().get_balance( owner, amount_to_subtract.amount.asset_id ) >= amount_to_subtract.amount );
 		 db().adjust_balance( owner, -amount_to_subtract.amount );}
 		 db().adjust_balance( owner, amount_to_issue );
 
@@ -593,10 +594,11 @@ void convert_evaluator::do_apply( const convert_operation& o )
 		 const asset amount_to_issue = o;
 		 const asset amount_to_subtract = o;
 		 amount_to_subract.amount.asset_id = MUSE_SYMBOL;
+		 FC_ASSERT( db().get_balance( owner, amount_to_subtract.amount.asset_id ) >= amount_to_subtract.amount );
 		 db().adjust_balance( owner, -amount_to_subtract.amount );
 		 db().adjust_balance( owner, amount_to_issue.amount );
 
-		 db().push_applied_operation( fill_convert_request_operation ( o.owner, o.requestid, amount_to_subtract.amount, amount_to_issue ) );
+		 db().push_applied_operation( fill_convert_request_operation ( o.owner, o.requestid, amount_to_subtract.amount, amount_to_issue ) ); //no supply updates are required
 	  }
 	  else
 		 db().create<convert_request_object>( [&]( convert_request_object& obj )
